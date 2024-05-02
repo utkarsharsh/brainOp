@@ -1,44 +1,87 @@
 import React, { useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Form, useForm } from 'react-hook-form';
 import add from '../assets/add.svg'
 import { useDispatch } from 'react-redux';
 import { increment } from '../store/createslice';
-import { GoogleReCaptchaProvider, GoogleReCaptcha } from "react-google-recaptcha-v3";
+import ReCAPTCHA from "react-google-recaptcha";
+import { useNavigate } from "react-router-dom"
+import axios from 'axios'
 const Signup = () => {
+  const navigate=useNavigate()
   const [password,setpassword]=useState('')
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [successMessage, setSuccessMessage] = useState('');
+  const [token, setToken] = useState("");
   const [image,setimage]=useState('');
-  const [imageurl,setimageurl]=useState('');
+  const [imageurl,setimageurl]=useState();
   const Dispatch =useDispatch();
-  const onSubmit = (e) => {
-   
-      e={...e,image}
-    Dispatch(increment(e));
-    
-    console.log(e);
+  const key=import.meta.env.VITE_KEY;
+  
+ 
+  
+
+
+
+  const onSubmit = async (e) => {
+   if(token=="") {
+    alert("mark the reChapche");
+    return;
+   }
+      e={...e,image};
+      let x=e;
+    Dispatch(increment(x));
+    e={...e,image,token};
+    console.log(import.meta.env.VITE_URL);
+    let url = import.meta.env.VITE_URL;
+  let signup="/signup"
+  url =url.concat(signup);
+  console.log(url);
+     const {data}= await axios.post(url,e,{
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+  });
+  setSuccessMessage(data.status);
+  if(data.status=="Succesfull"){
+    console.log("in")
+    localStorage.setItem("token",data.token);
+    navigate("/post");
   };
+  };
+
   const refer=useRef();
   async function handleurlchange(e){
       let x=e.target.files[0];
     const blob = new Blob([x], { type: x.type });
     const objectURL = URL.createObjectURL(blob);
     setimage(objectURL);
+    const dat=new FormData();
+    dat.append("file",x);
+    dat.append("upload_preset","Brainop");
+    const {data} =await axios.post("https://api.cloudinary.com/v1_1/disggmk1g/image/upload",dat) ;
+    console.log(data);
+     setimageurl(data.url);
+     console.log(data);
   }
-  const [token, setToken] = useState("");
-  const [refreshReCaptcha, setRefreshReCaptcha] = useState(false);
-  const setTokenFunc = (getToken) => {
-    setToken(getToken);
+  
+  
+
+  function setTokenFunc(getToken)  {
+      setToken(getToken);
+ console.log(getToken);
   };
 
 
+  
 
 
   return (
+   
+ 
     <div className="flex h-screen justify-center w-screen 
     bg-[url('https://d.furaffinity.net/art/murcielagomedula/1300569075/1300569075.murcielagomedula_apophysis-110319-5.jpg')]
     ">
-    <div className="max-w-md mx-auto mt-8 p-6  rounded shadow-lg sm:bg-white sm:h-5/6  w-[100%]">
+    <div className="max-w-md mx-auto mt-8 p-6  rounded shadow-lg sm:bg-white sm:h-6/6 mb-5 overflow-auto  w-[100%]">
       <h2 className="text-2xl mb-4 text-center text-white sm:text-blue-500 sm:font-bold">Sign Up</h2>
       {successMessage && (
         <div className="bg-green-200 text-green-700 p-3 rounded mb-4">{successMessage}</div>
@@ -80,19 +123,14 @@ const Signup = () => {
           </label>
           {errors.termsAndConditions && <p className="text-red-500">Terms & Conditions must be accepted</p>}
         </div>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Sign Up</button>
-
-
-
-        <GoogleReCaptchaProvider reCaptchaKey={process.env.REACT_APP_RECAPTCHA_KEY}>
-          <GoogleReCaptcha
-            className="google-recaptcha-custom-class"
-            onVerify={setTokenFunc}
-            refreshReCaptcha={refreshReCaptcha}
-          />
-        </GoogleReCaptchaProvider>
+        <ReCAPTCHA
+    sitekey={key}
+    onChange={setTokenFunc}
+  />
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Sign Up</button>       
       </form>
     </div></div>
+    
   );
 };
 

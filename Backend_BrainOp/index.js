@@ -9,10 +9,12 @@ dotenv.config();
 connectDB();
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/api',router);
 
 
 
-app.listen(3000 || port,()=>{
+app.listen(3000 ,(x)=>{
     console.log("listening");
+    console.log(3000);
 });
