@@ -13,7 +13,7 @@ const Signup = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [token, setToken] = useState("");
   const [image,setimage]=useState('');
-  const [imageurl,setimageurl]=useState();
+  const [imageurl,setimageurl]=useState("");
   const Dispatch =useDispatch();
   const key=import.meta.env.VITE_KEY;
   
@@ -27,10 +27,14 @@ const Signup = () => {
     alert("mark the reChapche");
     return;
    }
-      e={...e,image};
+   if(imageurl==""){
+    alert("wait for image to upload");
+    return;
+   }
+      e={...e,image:imageurl};
       let x=e;
     Dispatch(increment(x));
-    e={...e,image,token};
+    e={...e,image:imageurl,token};
     console.log(import.meta.env.VITE_URL);
     let url = import.meta.env.VITE_URL;
   let signup="/signup"
@@ -43,7 +47,6 @@ const Signup = () => {
   });
   setSuccessMessage(data.status);
   if(data.status=="Succesfull"){
-    console.log("in")
     localStorage.setItem("token",data.token);
     navigate("/post");
   };
@@ -59,16 +62,13 @@ const Signup = () => {
     dat.append("file",x);
     dat.append("upload_preset","Brainop");
     const {data} =await axios.post("https://api.cloudinary.com/v1_1/disggmk1g/image/upload",dat) ;
-    console.log(data);
      setimageurl(data.url);
-     console.log(data);
   }
   
   
 
   function setTokenFunc(getToken)  {
       setToken(getToken);
- console.log(getToken);
   };
 
 
@@ -107,7 +107,7 @@ const Signup = () => {
           {errors.password && errors.password.type === "minLength" && <p className="text-red-500">Password must be at least 6 characters</p>}
         </div>
         <div className="mb-4">
-          <input type="password" placeholder="Confirm Password" {...register("confirmPassword", { required: true, validate: value => value == password })} className="w-full p-2 border-2 border-cyan-500 rounded" />
+          <input type="password" placeholder="Confirm Password"  {...register("confirmPassword", { required: true, validate: value => value == password })} className="w-full p-2 border-2 border-cyan-500 rounded" />
           {errors.confirmPassword && errors.confirmPassword.type === "required" && <p className="text-red-500">Confirm Password is required</p>}
           {errors.confirmPassword && errors.confirmPassword.type === "validate" && <p className="text-red-500">Passwords must match</p>}
         </div>
@@ -127,7 +127,7 @@ const Signup = () => {
     sitekey={key}
     onChange={setTokenFunc}
   />
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Sign Up</button>       
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-3">Sign Up</button>       
       </form>
     </div></div>
     

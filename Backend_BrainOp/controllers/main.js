@@ -59,21 +59,32 @@ res.send({status:"Invalid Recapcha"});
 
 export const Post= async (req,res)=>{
        const token =req.headers.authorization;
+       
+       console.log(token)
+
        let t= token.split(" ");
+       console.log(t);
        const pages=req.params.page;
-    const verify= await jwt.verify(t[1],process.env.SECRETKEY);
-   console.log(verify);
-   if(pages){
-    let x=await users.find();
-    let data=[]
-    for(let i=(pages-1)*10;i<x.length && i<pages*10;x++){
-     data.push(x);
+       console.log(pages)
+       try{
+    const verify=  jwt.verify(t[1],process.env.SECRETKEY);}
+    catch (err){
+  res.send(false)
     }
-    if(data.lenght!=0)
+   
+   if(pages!=0){
+    let x=await users.find();
+    console.log("data",x.length);
+    let data=[]
+    for(let i=(pages-1)*10;i<x.length && i<(pages*10);i++){
+     data.push(x[i]);
+    }
+        console.log(data.length);
     res.send(data);
-else res.send("Nothing to show");
+
    }
    else{
+    console.log("we");
    const data = await users.find();
    res.send(data);
 }
